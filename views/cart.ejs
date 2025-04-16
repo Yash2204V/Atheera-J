@@ -1,0 +1,157 @@
+<%- include('./partials/success-error') %>
+
+<%- include('./partials/header') %>
+
+<!-- Cart Section -->
+<div class="container py-16">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Shopping Cart</h1>
+
+    <% if (user.cart.length === 0) { %>
+        <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+            <div class="w-24 h-24 mx-auto mb-6 text-gray-400">
+                <i class="fas fa-shopping-cart text-6xl"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Your cart is empty</h2>
+            <p class="text-gray-600 mb-6">Add items to your cart and they'll appear here.</p>
+            <a href="/products/shop" 
+               class="inline-block px-8 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                Continue Shopping
+            </a>
+        </div>
+    <% } else { %>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Cart Items -->
+            <div class="lg:w-2/3 space-y-6">
+                <% user.cart.reverse().forEach(function(Product) { %>
+                    <% 
+                        const variant = Product.product.variants[0];
+                        const price = variant.price;
+                        const discountedPrice = variant.discount || price;
+                        const selectedVariant = Product.product.variants.find(v => v.size === Product.size);
+
+                    %>
+                    
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden group">
+                        <div class="flex flex-col sm:flex-row">
+                            <!-- Image Section -->
+                            <div class="sm:w-1/3 relative aspect-square">
+                                <img src="data:<%= Product.product.images[0].contentType %>;base64,<%= Product.product.images[0].imageBuffer.toString('base64') %>"
+                                     alt="<%= Product.product.title %>"
+                                     class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <a href="/products/product/<%= Product.product._id %>"
+                                       class="text-white text-lg w-9 h-9 rounded-full bg-primary hover:bg-gray-800 transition-colors flex items-center justify-center">
+                                        <i class="fas fa-search"></i>
+                                    </a>
+                                    <a href="/products/deleted/<%= Product.product._id %>"
+                                       class="text-white text-lg w-9 h-9 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Details Section -->
+                            <div class="sm:w-2/3 p-6">
+                                <div class="flex flex-col h-full justify-around">
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-gray-800 mb-2 hover:text-primary transition-colors">
+                                            <a href="/products/product/<%= Product.product._id %>">
+                                                <%= Product.product.title %>
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-500 mb-4 capitalize">
+                                            <%= Product.product.category %> › <%= Product.product.subCategory %>
+                                        </p>
+                                        
+                                        <!-- Price -->
+                                        <div class="flex items-baseline space-x-2 mb-2">
+                                            <% if (selectedVariant.discount) { %>
+                                                <span class="text-xl text-gray-400 line-through">₹<%= selectedVariant.price %> </span>
+                                                <span class="text-2xl font-bold text-primary">₹<%= selectedVariant.discount %> </span>
+                                            <% } else { %>
+                                                <span class="text-2xl font-bold text-primary">₹<%= selectedVariant.price %></span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+
+                                    <form action="/products/cart/update/<%= Product.product._id %>" method="POST" >
+                                    <!-- Controls -->
+                                    <div class="space-y-4">
+                                        <!-- <% if(Product.product.subCategory !== "saree") { %>
+                                            <select name="size" 
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+                                                <option value="None" <%= Product.size === 'None' ? 'selected' : '' %>>Size</option>
+                                            </select>
+                                        <% } %> -->
+
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex items-center border rounded-lg overflow-hidden">
+                                                <button type="button" data-id="<%= Product._id %>" data-value="-1"
+                                                        class="quantity-btn px-4 py-3 text-gray-600 hover:bg-gray-100">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input id="quantity-<%= Product._id %>" 
+                                                       type="number" 
+                                                       name="quantity" 
+                                                       value="<%= Product.quantity %>"
+                                                       class="w-16 text-center border-x py-2"
+                                                       min="1" 
+                                                       max="10" 
+                                                       readonly>
+                                                <button type="button" data-id="<%= Product._id %>" data-value="1"
+                                                        class="quantity-btn px-4 py-3 text-gray-600 hover:bg-gray-100">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <button type="submit"
+                                                    class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                                                Update
+                                            </button>
+                                        </div>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:w-1/3">
+                <div class="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-6">Order Summary</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal</span>
+                            <span>₹<%= cartSummary.subtotal.toFixed(2) %></span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Discount</span>
+                            <span class="text-green-600">-₹<%= cartSummary.discount.toFixed(2) %></span>
+                        </div>
+                    
+                        <div class="border-t border-gray-200 pt-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-semibold text-gray-800">Total</span>
+                                <span class="text-xl font-bold text-primary">₹<%= cartSummary.total.toFixed(2) %></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="enquiry-btn-multiple"
+                            class="w-full mt-6 px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-envelope"></i>
+                        Place Enquiry
+                    </button>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+<script src="/javascripts/external-script.js"></script>
+
+<%- include('./partials/footer') %>

@@ -1,0 +1,25 @@
+<%- include('./partials/header') %>
+
+<!-- Form Wrapper -->
+<div style="display: flex; justify-content: center; height: auto; padding: 10px; margin: 10px auto;">
+    <div style="max-width: 32rem; width: 100%; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 0.75rem; padding: 2rem;">
+        <h2 style="font-size: 1.875rem; font-weight: 600; color: #2d3748; text-align: center; text-transform: capitalize; letter-spacing: -0.05em;">
+            Continue with Google
+        </h2>
+        <p class="text-gray-500 text-center text-sm mt-2" style="color: #a0aec0; text-align: center; font-size: 0.875rem; margin-top: 0.5rem;">
+            Sign in quickly and securely using your Google account.
+        </p>
+        
+        <div class="mt-6 flex gap-4 justify-center" style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+            <a href="/user/auth/google"
+                class="flex items-center gap-3 w-full sm:w-2/3 py-3 px-5 text-center text-gray-800 bg-gray-100 border border-gray-300 rounded-lg transition-transform duration-300 ease-in-out transform hover:bg-gray-200 hover:scale-105"
+                style="display: flex; align-items: center; gap: 0.75rem; width: 100%; max-width: 66.666667%; padding: 0.75rem 1.25rem; text-align: center; color: #2d3748; background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; transition: transform 0.3s ease-in-out;">
+                <img src="https://img.icons8.com/?size=25&id=17949&format=png&color=000000" alt="Google" class="w-5 h-5" style="width: 1.25rem; height: 1.25rem;">
+                <span class="font-medium" style="font-weight: 500;">Sign in with Google</span>
+            </a>
+        </div>
+    </div>
+</div>
+<!-- Form Wrapper End -->
+
+<%- include('./partials/footer') %>
