@@ -45,7 +45,7 @@ const shop = async (req, res) => {
         else if (category) {
             searchCriteria.category = category;
         }
-        // If we have a general search query
+        // If we have a general search query.
         else if (query) {
             searchCriteria.$or = [
                 { title: new RegExp(`^${query}`, "i") },
@@ -61,6 +61,7 @@ const shop = async (req, res) => {
                 ...(maxPrice && { $lte: parseInt(maxPrice, 10) }),
             };
         }
+        
 
         // Count total products matching criteria
         const totalProducts = await Product.find(searchCriteria).countDocuments();
