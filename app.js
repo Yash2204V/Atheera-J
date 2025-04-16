@@ -105,7 +105,6 @@ const staticOptions = {
   lastModified: true
 };
 
-console.log(__dirname);
 
 app.use(express.static(path.join(__dirname, "public"), staticOptions));
 app.set("view engine", "ejs");
