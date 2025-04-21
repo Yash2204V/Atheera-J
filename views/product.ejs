@@ -7,13 +7,13 @@
         <div>
             <div>
                 <img id="main-img" class="w-full"
-                    src="data:<%= product.images[0].contentType %>;base64,<%= product.images[0].imageBuffer.toString('base64') %>"
+                    src="<%= product.images[0].url %> %>"
                     alt="Main Image">
             </div>
             <div class="grid grid-cols-5 gap-4 mt-4">
                 <% product.images.forEach((image)=>{ %>
                     <div>
-                        <img src="data:<%= image.contentType %>;base64,<%= image.imageBuffer.toString('base64') %>"
+                        <img src="<%= image.url %> %>"
                             class="single-img w-full cursor-pointer border border-primary">
                     </div>
                     <% }) %>
@@ -190,7 +190,7 @@
                     <a href="/products/product/<%= product._id %>"
                         class="bg-white p-3 rounded-full hover:bg-gray-100 transition-colors">
                         <div class="relative aspect-square overflow-hidden">
-                            <img src="data:<%= product.images[0].contentType %>;base64,<%= product.images[0].imageBuffer.toString('base64') %>"
+                            <img src="<%= product.images[0].url %>"
                                 alt="<%= product.title %>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             <div

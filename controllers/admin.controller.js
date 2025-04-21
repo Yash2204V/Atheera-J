@@ -1,6 +1,7 @@
 const { PASSCODE } = require("../config/environment");
 const Product = require("../models/product.model");
 const User = require("../models/user.model");
+const { deleteMultipleOnCloudinary, uploadMultipleOnCloudinary } = require("../utils/cloudinary");
 
 const searchAdminMod = async (req, res) => {
     const searchQuery = req.query.query || '';
@@ -36,14 +37,16 @@ const searchAdminMod = async (req, res) => {
 
 const createProduct = async (req, res) => {
     try {
-        const imageDocs = req.files.map(file => ({
-            imageBuffer: file.buffer,
-            contentType: file.mimetype,
-        }));
-    
+        const imagesPath = req.files.map(file => file.path);
+        const images = await uploadMultipleOnCloudinary(imagesPath);
+
+        if (!images) {
+            throw new Error("Images Upload failed on Cloudinary.")
+        }
+
         const productData = {
             ...req.body,
-            images: imageDocs,
+            images: images,
             quality: req.body.quality || "",
             generalDetails: req.body.generalDetails || "Not specified"
         };
@@ -59,12 +62,24 @@ const createProduct = async (req, res) => {
 }
 
 const deleteProduct = async (req, res) => {
+
     try {
-        await Product.findOneAndDelete({ _id: req.params.productid });
+        
+        const product = await Product.findOne({ _id: req.params.productid });
+        const images = product.images.map(image => image.public_id);
+
+        const areImageDeleted = await deleteMultipleOnCloudinary(images);
+
+        if (!areImageDeleted) {
+            throw new Error("Deleting Failed")
+        }
+
+        await Product.findByIdAndDelete({ _id: req.params.productid });
         res.redirect("/admin");
-    } catch (e) {
+
+    } catch (error) {
         res.status(400).json({
-            err: e.message
+            error: error.message
         });
     }
 }

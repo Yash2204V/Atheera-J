@@ -9,14 +9,23 @@ const mongoose = require("mongoose");
  * Product Schema
  * Defines the structure and validation for product data
  */
+
+const imageSchema = new mongoose.Schema({
+    url: {
+        type: String,
+        required: true
+    },
+    public_id: {
+        type: String,
+        required: true
+    }
+});
+
 const productSchema = new mongoose.Schema({
     // Basic product information
     // Product images
     images: {
-        type: [{
-            imageBuffer: Buffer,
-            contentType: String
-        }],
+        type: [imageSchema],
         validate: {
             validator: function (val) {
                 if (!val || val.length === 0) {
