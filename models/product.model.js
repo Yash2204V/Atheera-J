@@ -9,65 +9,16 @@ const mongoose = require("mongoose");
  * Product Schema
  * Defines the structure and validation for product data
  */
-
-const imageSchema = new mongoose.Schema({
-    url: {
-        type: String,
-        required: true
-    },
-    public_id: {
-        type: String,
-        required: true
-    }
-});
-
 const productSchema = new mongoose.Schema({
     // Basic product information
-    // Product images
-    images: {
-        type: [imageSchema],
-        validate: {
-            validator: function (val) {
-                if (!val || val.length === 0) {
-                    throw new Error("At least one image is required");
-                }
-                if (val.length > 7 || val.length < 3) {
-                    throw new Error("You can upload a ranges from 3 to 7 images");
-                }
-                return true;
-            },
-            message: props => props.reason
-        }
-    },
-    // Title
     title: {
         type: String,
         required: [true, 'Product title is required'],
         trim: true,
         maxlength: [100, 'Title cannot exceed 100 characters']
     },
-    // Product details
-    description: {
-        type: String,
-        default: "",
-        trim: true,
-        required: [true, 'Description is required'],
-        maxlength: [2000, 'Description cannot exceed 2000 characters']
-    },
-    generalDetails: {
-        type: String,
-        default: "",
-        trim: true,
-        required: [true, 'General Details is required'],
-        maxlength: [2000, 'General Details cannot exceed 2000 characters']
-    },
-    // Categorization
     category: {
         type: String,
-        enum: {
-            values: ["jewellery"],
-            message: '{VALUE} is not a supported category'
-        },
         required: [true, 'Category is required'],
         trim: true,
         index: true
@@ -84,11 +35,68 @@ const productSchema = new mongoose.Schema({
         trim: true,
         index: true
     },
-    quality: {
+    brand: {
         type: String,
-        required: true,
-        default: ""
+        default: "",
+        trim: true
     },
+
+    // Product details
+    description: {
+        type: String,
+        default: "",
+        trim: true,
+        required: [true, 'Description is required'],
+        maxlength: [2000, 'Description cannot exceed 2000 characters']
+    },
+
+    weight: {
+        type: String,
+        default: "",
+        trim: true
+    },
+
+    // Product images
+    images: {
+        type: [{
+            imageBuffer: Buffer,
+            contentType: String,
+            url: String,
+            public_id: String,
+            optimization: {
+                originalSize: String,
+                optimizedSize: String,
+                reduction: String,
+                format: String,
+                dimensions: String
+            }
+        }],
+        validate: {
+            validator: function (val) {
+                if (!val || val.length === 0) {
+                    throw new Error("At least one image is required");
+                }
+                if (val.length > 7 || val.length < 3) {
+                    throw new Error("You can upload a ranges from 3 to 7 images");
+                }
+                return true;
+            },
+            message: props => props.reason
+        }
+    },
+
+    // Product status
+    availability: {
+        type: Boolean,
+        default: true,
+        index: true
+    },
+    featured: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+
     // Product variants
     variants: [{
         _id: {
@@ -100,39 +108,35 @@ const productSchema = new mongoose.Schema({
             required: [true, 'Model number is required'],
             trim: true
         },
+        size: {
+            type: String,
+            enum: {
+                values: ["XS", "S", "M", "L", "XL", "XXL", "3XL", "None"],
+                message: '{VALUE} is not a supported size'
+            },
+            required: true,
+            default: "None"
+        },
+        discount: {
+            type: Number,
+            default: 0,
+            min: [0, 'Discount cannot be negative']
+        },
         price: {
             type: Number,
             required: [true, 'Price is required'],
             min: [0, 'Price cannot be negative']
         },
-        discount: {
-            type: Number,
-            default: 0,
-            min: [0, 'Discount cannot be negative'],
-            validate: {
-                validator: function (value) {
-                    return value <= this.price;
-                },
-                message: 'Discount price cannot be greater than regular price'
-            }
-        },
-        size: {
-            type: String,
-            enum: {
-                values: ["None"],
-                message: '{VALUE} is not a supported size'
-            },
-            default: "None"
-        },
         quantity: {
             type: Number,
             required: [true, 'Quantity is required'],
-            min: [0, 'Quantity cannot be negative'],
-            validate: {
-                validator: Number.isInteger,
-                message: 'Quantity must be a whole number'
-            }
+            min: [0, 'Quantity cannot be negative']
         },
+        quality: {
+            type: String,
+            required: true,
+            default: ""
+        }
     }],
 
     // Timestamps
@@ -180,23 +184,52 @@ productSchema.virtual('totalStock').get(function () {
  */
 productSchema.pre("validate", function (next) {
     const validSubCategories = {
-        jewellery: ["diamond", "gold"],
+        clothing: ["suit", "saree", "kurti", "leggings"],
+        electronics: ["mobile", "laptop", "tablet", "accessories", "audio"],
+        accessories: ["watches", "jewelry", "bags", "sunglasses"],
+        footwear: ["casual", "formal", "sports", "sandals"],
+        home: ["furniture", "decor", "kitchen", "bedding"],
+        beauty: ["makeup", "skincare", "haircare", "fragrance"]
     };
 
     const validSubSubCategories = {
-        diamond: ["necklace", "pendant", "earring", "ring", "bracelet"],
-        gold: ["necklace", "pendant", "earring", "ring", "bracelet"]
+        // Clothing
+        suit: ["ethnic", "partywear", "lehenga", "regular"],
+        saree: ["ethnic", "partywear", "regular"],
+        kurti: ["ethnic", "short", "regular"],
+        leggings: ["casual", "ethnic", "regular", "printed"],
+        
+        // Electronics
+        mobile: ["smartphone", "feature-phone", "tablet"],
+        laptop: ["gaming", "business", "student"],
+        tablet: ["android", "ios"],
+        "electronics-accessories": ["charger", "case", "screen-guard"],
+        audio: ["headphones", "speakers", "earbuds"],
+        
+        // Accessories
+        watches: ["analog", "digital", "smart"],
+        jewelry: ["necklace", "earrings", "rings"],
+        bags: ["handbag", "wallet", "backpack"],
+        sunglasses: ["aviator", "wayfarer", "round"],
+        
+        // Footwear
+        casual: ["sneakers", "loafers", "slip-ons"],
+        formal: ["oxford", "derby", "boots"],
+        sports: ["running", "training", "outdoor"],
+        sandals: ["flats", "heels", "platforms"],
+        
+        // Home
+        furniture: ["living", "bedroom", "dining"],
+        decor: ["wall-art", "lighting", "mirrors"],
+        kitchen: ["cookware", "storage", "appliances"],
+        bedding: ["bedsheets", "pillows", "comforters"],
+        
+        // Beauty
+        makeup: ["face", "eyes", "lips"],
+        skincare: ["cleansers", "moisturizers", "treatments"],
+        haircare: ["shampoo", "conditioner", "styling"],
+        fragrance: ["perfume", "deodorant", "body-mist"]
     };
-
-    // Validate subCategory
-    if (!validSubCategories[this.category]?.includes(this.subCategory)) {
-        return next(new Error(`Invalid sub-category '${this.subCategory}' for the selected category '${this.category}'`));
-    }
-
-    // Validate subSubCategory
-    if (!validSubSubCategories[this.subCategory]?.includes(this.subSubCategory)) {
-        return next(new Error(`Invalid sub-sub-category '${this.subSubCategory}' for the selected sub-category '${this.subCategory}'`));
-    }
 
     next();
 });

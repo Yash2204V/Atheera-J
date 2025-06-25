@@ -54,4 +54,39 @@ transporter.sendWithRetry = async (mailOptions, retries = 3) => {
   }
 };
 
-module.exports = transporter;
+/**
+ * Send OTP verification email
+ * @param {string} email - Email address to send OTP to
+ * @param {string} otp - OTP code to send
+ * @returns {Promise} - Nodemailer send response
+ */
+const sendOTPEmail = async (email, otp) => {
+  try {
+    const mailOptions = {
+      from: EMAIL,
+      to: email,
+      subject: 'Email Verification OTP',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Email Verification</h2>
+          <p>Your verification code is:</p>
+          <h1 style="color: #4F46E5; font-size: 32px; letter-spacing: 5px; text-align: center; padding: 20px; background: #F3F4F6; border-radius: 8px;">${otp}</h1>
+          <p>This code will expire in 10 minutes.</p>
+          <p>If you didn't request this code, please ignore this email.</p>
+        </div>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ OTP email sent:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('❌ Error sending OTP email:', error);
+    throw error;
+  }
+};
+
+module.exports = {
+  transporter,
+  sendOTPEmail
+};

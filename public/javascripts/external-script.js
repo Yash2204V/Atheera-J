@@ -7,65 +7,22 @@ const filterSidebar = document.getElementById('filter-sidebar');
 const filterOverlay = document.getElementById('filter-overlay');
 const closeFilter = document.getElementById('close-filter');
 
+
+
 if (enquiryBtnSing) {
     enquiryBtnSing.addEventListener("click", () => {
         const id = enquiryBtnSing.getAttribute("data-value");
-        const products = enquiryBtnSing.getAttribute("data-product");
-        
-        // Extract available sizes
-        const sizeRegex = /size:\s*'([^']*)'/g;
-        const sizes = [];
-        let match;
-        while ((match = sizeRegex.exec(products)) !== null) {
-            sizes.push(match[1]);
-        }
-        const uniqueSizes = [...new Set(sizes)];
-        const availableSizesStr = uniqueSizes.join(', ');
-
-        // Get user input
-        const userInput = prompt('Enter your phone number (e.g., +91-9876543210):')?.trim();
-        if (!userInput) return;
-
-        // Get size with validation
-        const variant = prompt(`Enter Available Size (${availableSizesStr}):`)?.trim();
-        if (!variant) return;
-        // console.log(variant.charAt(0).toUpperCase() + variant.slice(1));
-        const currSize = variant.charAt(0).toUpperCase() + variant.slice(1);
-        // Validate size
-        if (!uniqueSizes.includes(currSize)) {
-            return alert(`Invalid size! ${currSize}; Available sizes: ${availableSizesStr}`);
-        }
-
-        // Final confirmation
-        const isConfirmed = confirm(
-            `Please confirm your details:\n\n` +
-            `Phone Number: ${userInput}\n` +
-            `Selected Size: ${variant}\n\n` +
-            `Is this information correct?`
-        );
-
-        if (isConfirmed) {
-            window.location.href = `/products/enquiry/single/${id}?query=` +
-                encodeURIComponent(userInput) +
-                `&variant=` +
-                encodeURIComponent(variant);
-        } else {
-            alert('Submission canceled. Please try again with correct details.');
+        const userInput = prompt('Please enter your number & proceed:');
+        if (userInput) {
+            window.location.href = `/products/enquiry/single/${id}?query=` + encodeURIComponent(userInput);
         }
     });
 }
 
 if (enquiryBtnMulti) {
     enquiryBtnMulti.addEventListener("click", () => {
-        const userInput = prompt('Please enter your phone number & proceed: (eg. +91-9876543210)');
-        if(!userInput) return;
-        // Final confirmation
-        const isConfirmed = confirm(
-            `Please confirm your details:\n\n` +
-            `Phone Number: ${userInput}\n` +
-            `Is this information correct?`
-        );
-        if (isConfirmed) {
+        const userInput = prompt('Please enter your number & proceed:');
+        if (userInput) {
             window.location.href = `/products/enquiry/multiple?query=` + encodeURIComponent(userInput);
         }
     });
@@ -125,11 +82,12 @@ if (filterToggle && filterSidebar && filterOverlay) {
     });
 }
 
+// -----------------------------------------------------------------------------
 
 let mainImg = document.getElementById('main-img')
 let imgBars = document.getElementsByClassName('single-img')
 
-if (mainImg && imgBars) {
+if(mainImg && imgBars){
     for (let imgBar of imgBars) {
         imgBar.addEventListener('click', function () {
             clearActive()
@@ -138,7 +96,7 @@ if (mainImg && imgBars) {
             this.classList.add('border-primary')
         })
     }
-
+    
     function clearActive() {
         for (let imgBar of imgBars) {
             imgBar.classList.remove('border-primary')
@@ -146,28 +104,16 @@ if (mainImg && imgBars) {
     }
 }
 
-// Quantity input handling
-document.addEventListener('DOMContentLoaded', function () {
-    const quantityInput = document.querySelector('input[name="quantity"]');
-    const decrementBtn = document.querySelector('[data-action="decrement"]');
-    const incrementBtn = document.querySelector('[data-action="increment"]');
 
-    if (quantityInput && decrementBtn && incrementBtn) {
-        function updateQuantity(newValue) {
-            const value = Math.min(Math.max(parseInt(newValue) || 1, 1), 10);
-            quantityInput.value = value;
-        }
-
-        decrementBtn.addEventListener('click', () => {
-            updateQuantity(parseInt(quantityInput.value) - 1);
-        });
-
-        incrementBtn.addEventListener('click', () => {
-            updateQuantity(parseInt(quantityInput.value) + 1);
-        });
-
-        quantityInput.addEventListener('change', (e) => {
-            updateQuantity(e.target.value);
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    const scrollPosition = localStorage.getItem("scrollPosition");
+    if (scrollPosition) {
+        window.scrollTo(0, parseInt(scrollPosition, 10));
     }
+    const saveScrollPosition = () => {
+        localStorage.setItem("scrollPosition", window.scrollY);
+    };
+
+    window.addEventListener("beforeunload", saveScrollPosition);
+    return () => window.removeEventListener("beforeunload", saveScrollPosition);
 });

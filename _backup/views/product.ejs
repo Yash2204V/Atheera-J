@@ -1,0 +1,257 @@
+<%- include('./partials/header') %>
+
+    <!-- product view -->
+    <div class="container pt-4 pb-6 grid lg:grid-cols-2 gap-6">
+        <!-- product image -->
+        <div>
+            <div>
+                <img id="main-img" class="w-full"
+                    src="data:<%= product.images[0].contentType %>;base64,<%= product.images[0].imageBuffer.toString('base64') %>"
+                    alt="Main Image">
+            </div>
+            <div class="grid grid-cols-5 gap-4 mt-4">
+                <% product.images.forEach((image)=>{ %>
+                    <div>
+                        <img src="data:<%= image.contentType %>;base64,<%= image.imageBuffer.toString('base64') %>"
+                            class="single-img w-full cursor-pointer border border-primary">
+                    </div>
+                    <% }) %>
+            </div>
+
+        </div>
+        <!-- product image end -->
+
+        <!-- product content -->
+        <div class="px-4 sm:px-0">
+            <h2 class="text-2xl sm:text-3xl font-medium uppercase mb-2">
+                <%= product.title %>
+            </h2>
+            <div class="space-y-2">
+                <p class="text-gray-800 font-semibold space-x-2">
+                    <span>Availability: </span>
+                    <span class="<%= product.availability ? 'text-green-600' : 'text-red-600' %> ">
+                        <%= product.availability ? 'In Stock' : 'Not in Stock' %>
+                    </span>
+                </p>
+                <p class="space-x-2">
+                    <span class="text-gray-800 font-semibold">Brand: </span>
+                    <span class="text-gray-600">
+                        <%= product.brand %>
+                    </span>
+                </p>
+                <p class="space-x-2">
+                    <span class="text-gray-800 font-semibold">Category: </span>
+                    <span class="text-gray-600 capitalize">
+                        <%= product.subCategory %>
+                    </span>
+                </p>
+                <p class="space-x-2">
+                    <span class="text-gray-800 font-semibold">SKU: </span>
+                    <span class="text-gray-600">
+                        <%= product.variants[0].modelno %>
+                    </span>
+                </p>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-baseline gap-3">
+                <span class="text-2xl sm:text-3xl font-semibold text-primary">₹<%= product.variants[0].price %></span>
+                <span class="text-base sm:text-lg text-gray-500 line-through">₹<%= product.variants[0].price + 10 %>
+                </span>
+            </div>
+
+            <!-- size -->
+            <div class="mt-4">
+                <h3 class="text-base text-gray-800 mb-1">Size</h3>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <% const availableSizes=product.variants.map(v=> v.size); %>
+                        <% ['XS', 'S' , 'M' , 'L' , 'XL' , 'XXL' , 'XXXL' ].forEach(function(size){ %>
+                            <!-- single size -->
+                            <div class="size-selector">
+                                <input type="radio" name="size" class="hidden " id="size-<%= size %>"
+                                    <%=availableSizes.includes(size) ? '' : 'disabled' %>>
+                                <label for="size-<%= size %>"
+                                    class="text-base p-2 border border-gray-200 rounded-sm h-6 w-9 flex items-center justify-center cursor-pointer shadow-sm text-gray-600 <%= availableSizes.includes(size) ? 'hover:border-primary hover:text-primary transition-colors' : 'opacity-50 cursor-not-allowed' %>">
+                                    <span class="relative <%= availableSizes.includes(size) ? 'text-red-500' : 'line-through text-gray-500' %>"><%= size %></span>
+
+                                </label>
+                            </div>
+                            <!-- single size end -->
+                            <% }) %>
+                </div>
+            </div>
+            <!-- size end -->
+
+            
+
+            <!-- color -->
+            <div class="mt-6">
+                <h3 class="text-base text-gray-800 mb-2">Color</h3>
+                <div class="flex flex-wrap items-center gap-3">
+                    <% product.variants.forEach(function(variant, index){ %>
+                        <div class="color-selector">
+                            <input type="radio" name="color" class="hidden" id="color-<%= index %>" <%=index===0
+                                ? 'checked' : '' %>>
+                            <label for="color-<%= index %>"
+                                class="w-8 h-8 rounded-full border-2 border-gray-300 cursor-pointer hover:border-primary transition-colors"
+                                style=`background-color: red`>
+                            </label>
+                            <p>
+                                <%= variant.color %>
+                            </p>
+                        </div>
+                        <% }) %>
+                </div>
+            </div>
+            <!-- color end -->
+
+            <!-- quantity -->
+            <div class="mt-6">
+                <h3 class="text-base text-gray-800 mb-2">Quantity</h3>
+                <div class="flex items-center border border-gray-300 rounded-lg divide-x divide-gray-300 w-max">
+                    <button
+                        class="w-10 h-10 text-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors">-</button>
+                    <input type="number" value="1" class="w-14 h-10 text-center border-0 focus:ring-0" min="1" max="10">
+                    <button
+                        class="w-10 h-10 text-xl flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors">+</button>
+                </div>
+            </div>
+            <!-- quantity end -->
+
+            <!-- action buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 border-b border-gray-200 pb-5 mt-6">
+                <a href="/products/addtocart/<%= product._id %>"
+                    class="flex-1 bg-primary border border-primary text-white px-8 py-3 font-medium rounded-lg hover:bg-transparent hover:text-primary transition-colors text-center flex items-center justify-center gap-2">
+                    <i class="fas fa-shopping-bag"></i>
+                    Add to cart
+                </a>
+                <button id="enquiry-btn-single"
+                    class="flex-1 border border-gray-300 text-gray-600 px-8 py-3 font-medium rounded-lg hover:bg-primary hover:text-white hover:border-primary transition-colors flex items-center justify-center gap-2"
+                    data-value="<%= product._id %>">
+                    <i class="far fa-envelope"></i>
+                    Enquiry
+                </button>
+            </div>
+            <!-- action buttons end -->
+
+            <!-- social share -->
+            <div class="flex items-center gap-3 mt-4">
+                <span class="text-gray-600">Share:</span>
+                <a href="#"
+                    class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:text-primary hover:border-primary transition-colors">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#"
+                    class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:text-primary hover:border-primary transition-colors">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#"
+                    class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:text-primary hover:border-primary transition-colors">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </div>
+            <!-- social share end -->
+        </div>
+        <!-- product content end -->
+    </div>
+    <!-- product view end -->
+
+    <!-- product details -->
+    <div class="container pb-16">
+        <h3 class="border-b border-gray-200 font-roboto text-gray-800 pb-3 font-medium text-xl">
+            Product Details
+        </h3>
+
+        <div class="lg:w-4/5 xl:w-3/5 pt-6">
+            <div class="space-y-3 text-gray-600">
+                <p class="text-sm sm:text-base leading-relaxed">
+                    <%= product.description %>
+                </p>
+            </div>
+
+            <!-- details table -->
+            <table class="table-auto border-collapse w-full text-left text-gray-600 text-sm mt-6">
+                <tr>
+                    <th class="py-2 px-4 border border-gray-300 w-40 font-medium">Color</th>
+                    <td class="py-2 px-4 border border-gray-300 capitalize">
+                        <% product.variants.forEach((variant, index)=> { %>
+                            <%= variant.quality %>
+                                <%= index < product.variants.length - 1 ? ', ' : '' %>
+                                    <% }) %>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="py-2 px-4 border border-gray-300 w-40 font-medium">Weight</th>
+                    <td class="py-2 px-4 border border-gray-300">
+                        <%= product.weight %>
+                    </td>
+                </tr>
+            </table>
+            <!-- details table end -->
+        </div>
+    </div>
+    <!-- product details end -->
+
+    <!-- related products -->
+    <div class="container pb-16">
+        <h2 class="text-2xl font-medium text-gray-800 uppercase mb-6">Related Products</h2>
+
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% relatedProducts.forEach(function(relatedProduct) { %>
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden group">
+                    <div class="relative aspect-square">
+                        <img src="data:<%= relatedProduct.images[0].contentType %>;base64,<%= relatedProduct.images[0].imageBuffer.toString('base64') %>"
+                            alt="<%= relatedProduct.title %>"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div
+                            class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity invisible group-hover:visible">
+                            <a href="/products/product/<%= relatedProduct._id %>"
+                                class="text-white text-lg w-9 h-9 rounded-full bg-primary hover:bg-gray-800 transition-colors flex items-center justify-center">
+                                <i class="fas fa-search"></i>
+                            </a>
+                            <a href="/products/addtocart/<%= relatedProduct._id %>?direct=true"
+                                class="text-white text-lg w-9 h-9 rounded-full bg-primary hover:bg-gray-800 transition-colors flex items-center justify-center">
+                                <i class="fas fa-shopping-cart"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 pb-3 px-4">
+                        <a href="/products/product/<%= relatedProduct._id %>">
+                            <h4
+                                class="uppercase font-medium text-xl mb-2 text-gray-800 hover:text-primary transition line-clamp-1">
+                                <%= relatedProduct.title %>
+                            </h4>
+                        </a>
+                        <div class="flex items-baseline mb-1 space-x-2">
+                            <% if (relatedProduct.variants[0].discount) { %>
+                                <p class="text-xl text-primary font-semibold">₹<%= relatedProduct.variants[0].discount
+                                        %>
+                                </p>
+                                <p class="text-sm text-gray-400 line-through">₹<%= relatedProduct.variants[0].price %>
+                                </p>
+                                <% } else { %>
+                                    <p class="text-xl text-primary font-semibold">₹<%= relatedProduct.variants[0].price
+                                            %>
+                                    </p>
+                                    <% } %>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="flex gap-1 text-sm text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <div class="text-xs text-gray-500 ml-3">(150)</div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+        </div>
+    </div>
+    <!-- related products end -->
+
+    <script src="/javascripts/external-script.js"></script>
+
+    <%- include('./partials/footer') %>

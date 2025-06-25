@@ -1,0 +1,158 @@
+<!-- Include success/error messages -->
+<div class="relative">
+    <%- include('./partials/suceess-error') %>
+</div>
+
+<%- include('./partials/header') %>
+
+<!-- Cart Section -->
+<div class="container py-16">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Shopping Cart</h1>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Cart Items -->
+        <div class="lg:w-2/3">
+            <% if (user.cart.length === 0) { %>
+                <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <img src="/images/empty-cart.webp" alt="Empty Cart" class="w-64 mx-auto mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Your cart is empty</h2>
+                    <p class="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
+                    <a href="/products/shop" 
+                       class="inline-block px-8 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        Continue Shopping
+                    </a>
+                </div>
+            <% } else { %>
+                <div class="space-y-4">
+                    <% user.cart.reverse().forEach(function(Product) { %>
+                        <% 
+                            let price = Product.product.variants[0].price; 
+                            let discountedPrice = Product.product.variants[0].discount || price;
+                            let finalPrice = discountedPrice;
+                        %>
+                        
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <div class="p-4 sm:p-6">
+                                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                                    <!-- Product Image -->
+                                    <div class="w-full sm:w-24 h-48 sm:h-24 flex-shrink-0">
+                                        <img src="data:<%= Product.product.images[0].contentType %>;base64,<%= Product.product.images[0].imageBuffer.toString('base64') %>"
+                                             alt="<%= Product.product.title %>"
+                                             class="w-full h-full object-cover rounded-lg">
+                                    </div>
+
+                                    <!-- Product Details -->
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                                            <%= Product.product.title %>
+                                        </h3>
+                                        <p class="text-sm text-gray-500 mb-4 capitalize">
+                                            <%= Product.product.category %> › <%= Product.product.subCategory %> › 
+                                            <%= Product.product.subSubCategory %>
+                                        </p>
+                                        
+                                        <!-- Price Info -->
+                                        <div class="flex flex-wrap items-center gap-2 mb-4">
+                                            <% if (Product.product.variants[0].discount) { %>
+                                                <span class="text-lg text-gray-400 line-through">₹<%= Product.product.variants[0].price %></span>
+                                                <span class="text-xl font-bold text-primary">₹<%= Product.product.variants[0].discount %></span>
+                                            <% } else { %>
+                                                <span class="text-xl font-bold text-primary">₹<%= Product.product.variants[0].price %></span>
+                                            <% } %>
+                                          
+                                        </div>
+
+                                        <!-- Size & Quantity Controls -->
+                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                            <form action="/products/cart/update/<%= Product.product._id %>" method="POST"
+                                                  class="flex flex-wrap items-center gap-4">
+                                                <% if(Product.product.subCategory !== "saree"){ %>
+                                                    <select name="size"
+                                                            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                        <option value="None" <%=Product.size==='None' ? 'selected' : '' %>>Size</option>
+                                                        <option value="XS" <%=Product.size==='XS' ? 'selected' : '' %>>XS</option>
+                                                        <option value="S" <%=Product.size==='S' ? 'selected' : '' %>>S</option>
+                                                        <option value="M" <%=Product.size==='M' ? 'selected' : '' %>>M</option>
+                                                        <option value="L" <%=Product.size==='L' ? 'selected' : '' %>>L</option>
+                                                        <option value="XL" <%=Product.size==='XL' ? 'selected' : '' %>>XL</option>
+                                                        <option value="XXL" <%=Product.size==='XXL' ? 'selected' : '' %>>XXL</option>
+                                                        <option value="XXL" <%=Product.size==='XXL' ? 'selected' : '' %>>XXXL</option>
+                                                    </select>
+                                                <% } %>
+
+                                                <div class="flex items-center border border-gray-300 rounded-lg">
+                                                    <button type="button" data-id="<%= Product._id %>" data-value="-1"
+                                                            class="quantity-btn px-4 py-2 text-gray-600 hover:bg-gray-100">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input id="quantity-<%= Product._id %>" 
+                                                           type="number" 
+                                                           name="quantity" 
+                                                           value="<%= Product.quantity %>"
+                                                           class="w-16 text-center border-x border-gray-300 py-2"
+                                                           min="1" 
+                                                           max="10" 
+                                                           readonly>
+                                                    <button type="button" data-id="<%= Product._id %>" data-value="1"
+                                                            class="quantity-btn px-4 py-2 text-gray-600 hover:bg-gray-100">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+
+                                                <button type="submit"
+                                                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                                                    Update
+                                                </button>
+                                                <a href="/products/deleted/<%= Product.product._id %>"
+                                                   class="text-red-500 hover:text-red-600 transition-colors">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </form>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:w-1/3">
+            <div class="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+                <h2 class="text-lg font-semibold text-gray-800 mb-6">Order Summary</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal</span>
+                        <span>₹<%= cartSummary ? cartSummary.subtotal.toFixed(2) : '0.00' %></span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Discount</span>
+                        <span class="text-green-600">-₹<%= cartSummary ? cartSummary.discount.toFixed(2) : '0.00' %></span>
+                    </div>
+                
+                    
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-semibold text-gray-800">Total</span>
+                            <span class="text-xl font-bold text-primary">₹<%= cartSummary ? cartSummary.total.toFixed(2) : '0.00' %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="enquiry-btn-multiple"
+                        class="w-full mt-6 px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-envelope"></i>
+                    Place Enquiry
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/javascripts/external-script.js"></script>
+
+<%- include('./partials/footer') %>

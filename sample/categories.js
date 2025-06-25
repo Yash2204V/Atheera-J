@@ -1,7 +1,9 @@
 const Category = {
-    jewellery: {
-        gold: ["necklace", "pendant", "earring", "ring", "bracelet"],
-        diamond: ["necklace", "pendant", "earring", "ring", "bracelet"]
+    clothing: {
+        suit: ["ethnic", "partywear", "lehenga", "regular"],
+        saree: ["ethnic", "partywear", "regular"],
+        kurti: ["ethnic", "short", "regular"],
+        leggings: ["casual", "ethnic", "regular", "printed"]
     }
 };
 

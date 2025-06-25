@@ -1,25 +1,65 @@
-<%- include('./partials/header') %>
-
-<!-- Form Wrapper -->
-<div style="display: flex; justify-content: center; height: auto; padding: 10px; margin: 10px auto;">
-    <div style="max-width: 32rem; width: 100%; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 0.75rem; padding: 2rem;">
-        <h2 style="font-size: 1.875rem; font-weight: 600; color: #2d3748; text-align: center; text-transform: capitalize; letter-spacing: -0.05em;">
-            Continue with Google
-        </h2>
-        <p class="text-gray-500 text-center text-sm mt-2" style="color: #a0aec0; text-align: center; font-size: 0.875rem; margin-top: 0.5rem;">
-            Sign in quickly and securely using your Google account.
-        </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | E-Commerce</title>
+    <link rel="stylesheet" href="/stylesheets/output.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-6">Login</h1>
         
-        <div class="mt-6 flex gap-4 justify-center" style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
-            <a href="/user/auth/google"
-                class="flex items-center gap-3 w-full sm:w-2/3 py-3 px-5 text-center text-gray-800 bg-gray-100 border border-gray-300 rounded-lg transition-transform duration-300 ease-in-out transform hover:bg-gray-200 hover:scale-105"
-                style="display: flex; align-items: center; gap: 0.75rem; width: 100%; max-width: 66.666667%; padding: 0.75rem 1.25rem; text-align: center; color: #2d3748; background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; transition: transform 0.3s ease-in-out;">
-                <img src="https://img.icons8.com/?size=25&id=17949&format=png&color=000000" alt="Google" class="w-5 h-5" style="width: 1.25rem; height: 1.25rem;">
-                <span class="font-medium" style="font-weight: 500;">Sign in with Google</span>
-            </a>
+        <% if (error) { %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <%= error %>
+            </div>
+        <% } %>
+        
+        <form action="/user/login" method="POST" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="email" required 
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" name="password" required 
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            
+            <button type="submit" 
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Sign in
+            </button>
+        </form>
+        
+        <div class="mt-6">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <a href="/user/auth/google" 
+                   class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <img class="h-5 w-5 mr-2" src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google logo">
+                    Google
+                </a>
+            </div>
         </div>
+        
+        <p class="mt-4 text-center text-sm text-gray-600">
+            Don't have an account? 
+            <a href="/user/register" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Register here
+            </a>
+        </p>
     </div>
-</div>
-<!-- Form Wrapper End -->
-
-<%- include('./partials/footer') %>
+</body>
+</html> 

@@ -27,6 +27,7 @@ if(categoryBar && closeCategory){
     })
 }
 
+
 // let the user when click to filter: the relative div appear, and when the user either click to filter or closeIcon: the relative div will disappear.
 if(filter){
     let divOpen = false;
@@ -52,3 +53,18 @@ function toggleElement(id) {
         icon.classList.toggle('fa-bars');
     }
 }
+
+// Enquiry
+
+document.addEventListener('DOMContentLoaded', () => {
+    const scrollPosition = localStorage.getItem("scrollPosition");
+    if (scrollPosition) {
+        window.scrollTo(0, parseInt(scrollPosition, 10));
+    }
+    const saveScrollPosition = () => {
+        localStorage.setItem("scrollPosition", window.scrollY);
+    };
+
+    window.addEventListener("beforeunload", saveScrollPosition);
+    return () => window.removeEventListener("beforeunload", saveScrollPosition);
+});

@@ -27,6 +27,7 @@ const MAX_RETRIES = 3;
  */
 const connectionDB = async (retryAttempt = 0) => {
   try {
+    console.log('Attempting to connect to MongoDB...');
     const conn = await mongoose.connect(MONGO_URI, connectionOptions);
     
     // Set up connection event handlers
@@ -43,28 +44,36 @@ const connectionDB = async (retryAttempt = 0) => {
     });
     
     // Log successful connection
-    dbgr(`✅ MongoDB connected: ${conn.connection.host}`);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
-  } catch (err) {
-    dbgr(`❌ MongoDB connection error: ${err.message}`);
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    // Retry connection with exponential backoff
+    const maxRetries = 3;
+    let retryCount = 0;
     
-    // Implement retry logic
-    if (retryAttempt < MAX_RETRIES) {
-      dbgr(`Retrying connection (${retryAttempt + 1}/${MAX_RETRIES})...`);
-      // Exponential backoff: 2^retryAttempt * 1000ms
-      const retryDelay = Math.pow(2, retryAttempt) * 1000;
-      
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
-      return connectionDB(retryAttempt + 1);
-    }
+    const retryConnection = async () => {
+      if (retryCount < maxRetries) {
+        retryCount++;
+        const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+        console.log(`Retrying connection in ${delay}ms... (Attempt ${retryCount}/${maxRetries})`);
+        
+        setTimeout(async () => {
+          try {
+            const conn = await mongoose.connect(MONGO_URI, connectionOptions);
+            console.log(`MongoDB Connected on retry: ${conn.connection.host}`);
+          } catch (retryError) {
+            console.error(`Retry ${retryCount} failed:`, retryError);
+            retryConnection();
+          }
+        }, delay);
+      } else {
+        console.error('Max retries reached. Could not connect to MongoDB.');
+        process.exit(1);
+      }
+    };
     
-    // If all retries fail, exit in production or just log in development
-    if (NODE_ENV === 'production') {
-      console.error('Failed to connect to MongoDB after multiple attempts. Exiting...');
-      process.exit(1);
-    } else {
-      console.error('Failed to connect to MongoDB after multiple attempts.');
-    }
+    retryConnection();
   }
 };
 

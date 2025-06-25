@@ -22,6 +22,17 @@ const adminAuthMiddleware = async (req, res, next) => {
     
     if (!token) {
       dbgr("⚠️ No authentication token found");
+      
+      // Check if request is for API (JSON) or HTML view
+      if (req.headers.accept?.includes('application/json') || 
+          req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+          req.path.includes('/api')) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication required"
+        });
+      }
+      
       return res.redirect("/user/login");
     }
 
@@ -36,19 +47,39 @@ const adminAuthMiddleware = async (req, res, next) => {
     });
 
     if (!admin) {
+      // Check if request is for API (JSON) or HTML view
+      if (req.headers.accept?.includes('application/json') || 
+          req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+          req.path.includes('/api')) {
+        return res.status(403).json({
+          success: false,
+          message: "Admin privileges required"
+        });
+      }
+      
       throw new Error("Unauthorized: Admin privileges required");
     }
-    // console.log(admin);
-    
 
     // Attach admin to request
     req.admin = admin;
+    req.user = admin; // Also set as user for compatibility
     req.token = token;
     
     dbgr(`✅ Admin authenticated: ${admin.email}`);
     next();
   } catch (err) {
     dbgr(`❌ Admin Authentication Error: ${err.message}`);
+    
+    // Check if request is for API (JSON) or HTML view
+    if (req.headers.accept?.includes('application/json') || 
+        req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+        req.path.includes('/api')) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin authentication failed",
+        error: err.message
+      });
+    }
     
     // Clear the invalid token
     res.clearCookie("token");
@@ -59,4 +90,4 @@ const adminAuthMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = adminAuthMiddleware;
+module.exports = adminAuthMiddleware; 

@@ -44,19 +44,13 @@ const errorHandler = (err, req, res, next) => {
     message = "Authentication token expired";
   }
 
-  // Set flash message for user-facing errors
-  if (statusCode < 500) {
-    req.flash('error', message);
-  } else {
-    req.flash('error', 'An unexpected error occurred. Please try again later.');
-  }
-
   // Log error details (only in development mode)
   if (NODE_ENV !== "production") {
     console.error(`❌ Error: ${message}`);
     console.error(`🔍 Stack Trace: ${err.stack}`);
   } else {
     // In production, log to a proper logging service
+    // Consider using Winston, Bunyan, or a cloud logging service
     console.error({
       timestamp: new Date().toISOString(),
       level: 'error',
@@ -70,23 +64,12 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // For API requests, send JSON response
-  if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.status(statusCode).json({
-      success: false,
-      message,
-      ...(NODE_ENV !== "production" && { stack: err.stack }),
-      ...(Object.keys(errorDetails).length > 0 && { details: errorDetails })
-    });
-  }
-
-  // For regular requests, render error page
-  res.status(statusCode).render("error", {
+  // Send response
+  res.status(statusCode).json({
+    success: false,
     message,
-    error: {
-      status: statusCode,
-      stack: NODE_ENV !== "production" ? err.stack : null
-    }
+    ...(NODE_ENV !== "production" && { stack: err.stack }),
+    ...(Object.keys(errorDetails).length > 0 && { details: errorDetails })
   });
 };
 

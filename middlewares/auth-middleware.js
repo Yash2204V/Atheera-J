@@ -17,24 +17,57 @@ const dbgr = require("debug")("development: middleware");
  */
 const authMiddleware = async (req, res, next) => {
   try {
+    console.log('Auth middleware: Checking request headers:', {
+      accept: req.headers.accept,
+      'x-requested-with': req.headers['x-requested-with'],
+      path: req.path
+    });
+    
     // Get token from cookies
     const token = req.cookies?.token;
+    console.log('Auth middleware: Token present:', !!token);
     
     if (!token) {
-      dbgr("⚠️ No authentication token found");
-      return res.redirect("/user/login");
+      console.log('Auth middleware: No token found');
+      
+      // Check if request is for API (JSON) or HTML view
+      if (req.headers.accept?.includes('application/json') || 
+          req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+          req.path.startsWith('/wishlist/')) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication required"
+        });
+      }
+      
+      // Preserve the intended destination in the redirect
+      const redirectUrl = `/user/login?redirect=${encodeURIComponent(req.originalUrl)}`;
+      return res.redirect(redirectUrl);
     }
 
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('Auth middleware: Token decoded successfully');
     
     // Find user by ID and token
     const user = await User.findOne({ 
       _id: decoded._id, 
       "tokens.token": token 
     });
+    console.log('Auth middleware: User found:', !!user);
 
     if (!user) {
+      console.log('Auth middleware: User not found or token invalid');
+      // Check if request is for API (JSON) or HTML view
+      if (req.headers.accept?.includes('application/json') || 
+          req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+          req.path.startsWith('/wishlist/')) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid token or user not found"
+        });
+      }
+      
       throw new Error("Invalid token or user not found");
     }
 
@@ -45,6 +78,7 @@ const authMiddleware = async (req, res, next) => {
     
     // If token is about to expire, issue a new one
     if (tokenExp - now < fifteenMinutes) {
+      console.log('Auth middleware: Token about to expire, generating new one');
       // Remove the current token
       user.tokens = user.tokens.filter(t => t.token !== token);
       
@@ -64,17 +98,31 @@ const authMiddleware = async (req, res, next) => {
     req.user = user;
     req.token = token;
     
-    dbgr(`✅ User authenticated: ${user.email}`);
+    console.log('Auth middleware: Authentication successful');
     next();
   } catch (err) {
-    dbgr(`❌ Authentication Error: ${err.message}`);
+    console.error('Auth middleware error:', err);
     
     // Clear the invalid token
     res.clearCookie("token");
+    
+    // Check if request is for API (JSON) or HTML view
+    if (req.headers.accept?.includes('application/json') || 
+        req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+        req.path.startsWith('/wishlist/')) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed",
+        error: err.message
+      });
+    }
     
     // Redirect to login
     res.status(401).redirect("/user/login");
   }
 };
 
-module.exports = authMiddleware;
+// Export middleware
+module.exports = {
+  requireAuth: authMiddleware
+};
