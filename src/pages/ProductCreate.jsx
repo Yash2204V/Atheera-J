@@ -45,12 +45,7 @@ function ProductCreate() {
   
   // Add this after the other state declarations
   const [selectedSizes, setSelectedSizes] = useState({
-    S: { checked: false, quantity: 0 },
-    M: { checked: false, quantity: 0 },
-    L: { checked: false, quantity: 0 },
-    XL: { checked: false, quantity: 0 },
-    XXL: { checked: false, quantity: 0 },
-    '3XL': { checked: false, quantity: 0 }
+    'None': { checked: false, quantity: 0 }
   });
   
   useEffect(() => {
@@ -292,12 +287,7 @@ function ProductCreate() {
         }]
       });
       setSelectedSizes({
-        S: { checked: false, quantity: 0 },
-        M: { checked: false, quantity: 0 },
-        L: { checked: false, quantity: 0 },
-        XL: { checked: false, quantity: 0 },
-        XXL: { checked: false, quantity: 0 },
-        '3XL': { checked: false, quantity: 0 }
+        'None': { checked: false, quantity: 0 }
       });
       
       // Navigate back to the appropriate dashboard

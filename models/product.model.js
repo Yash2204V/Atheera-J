@@ -111,7 +111,7 @@ const productSchema = new mongoose.Schema({
         size: {
             type: String,
             enum: {
-                values: ["XS", "S", "M", "L", "XL", "XXL", "3XL", "None"],
+                values: ["None"],
                 message: '{VALUE} is not a supported size'
             },
             required: true,

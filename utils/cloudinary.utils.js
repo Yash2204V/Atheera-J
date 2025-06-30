@@ -30,7 +30,7 @@ const formatBytes = (bytes) => {
  * @param {String} folder - Cloudinary folder name
  * @returns {Promise<Object>} Cloudinary upload result
  */
-const uploadBuffer = async (buffer, folder = 'jewellery') => {
+const uploadBuffer = async (buffer, folder = 'clothing_artificialJewellery') => {
     const originalSize = getFileSizeInMB(buffer);
     
     return new Promise((resolve, reject) => {
